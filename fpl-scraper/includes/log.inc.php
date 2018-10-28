@@ -30,10 +30,10 @@ class Log {
     static public function log_message($message) {
         switch (self::$logType) {
             case self::LOG_SCREEN:
-                echo "[FFS Importer]: $message\n";
+                echo "[X4FPL Processor]: $message\n";
                 break;
             case self::LOG_ERROR_LOG:
-                error_log("[FFS Importer]: $message\n", 3, FFS_LOG_FILE);
+                error_log("[X4FPL Processor]: $message\n", 3, X4FPL_LOG_FILE);
                 break;
         }
     }

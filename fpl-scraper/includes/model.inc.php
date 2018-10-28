@@ -8,10 +8,10 @@ abstract class Model {
 
     public function __construct() {
         $this->db = DB::get_instance(array(
-            'host' => FFS_DB_HOST,
-            'database' => FFS_DB_DATABASE,
-            'user' => FFS_DB_USER,
-            'pass' => FFS_DB_PASS
+            'host' => X4FPL_DB_HOST,
+            'database' => X4FPL_DB_DATABASE,
+            'user' => X4FPL_DB_USER,
+            'pass' => X4FPL_DB_PASS
         ));
     }
 

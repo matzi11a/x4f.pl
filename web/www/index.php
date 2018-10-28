@@ -4,7 +4,7 @@ error_reporting(E_ALL | E_STRICT);
 
 session_name('X4FPL');
 session_start();
-session_cache_limiter('nocache');
+//session_cache_limiter('nocache');
 
 /**
  * --------------------------------------------------------------
@@ -45,7 +45,7 @@ require HAPLO_FRAMEWORK_BASE.'/haplo-init.inc.php';
   **/
 $urls = array(
     // new stats api
-    '/api/v1/get-player-stats.json'                                                         => 'api/v1/get-player-stats',
+    '/api/v1/get-something.json'                                                         => 'api/v1/get-something',
     
     
     // redirect URLs without trailing slash
