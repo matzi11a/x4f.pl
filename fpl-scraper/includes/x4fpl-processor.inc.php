@@ -1,5 +1,8 @@
 <?php
 
+//https://fantasy.premierleague.com/drf/entry/48/event/10/picks
+//https://fantasy.premierleague.com/drf/event/10/live
+
 
 class X4FplProcessor {
 
@@ -32,16 +35,18 @@ class X4FplProcessor {
         $this->getModels();
         $startTime = microtime(true);
         
-        $firstTeamId = $this->runtimeModel->getLastTeamId();
+        $lastRun = $this->runtimeModel->getLastRuntime();        
+        $lastTeamId = isset($lastRun['last_team_id']) ? $lastRun['last_team_id'] : 29947;
+        
         $gameweek = $this->queryStatic();
         
-        Log::log_message(sprintf("Scanning Leagues from %d", $firstTeamId));
-        $lastTeamId = $this->scanFplLeagues($firstTeamId);
+        Log::log_message(sprintf("Scanning Leagues from %d", $lastTeamId));
+        $lastTeamId = $this->scanFplLeagues($lastTeamId);
         
         Log::log_message("Updating scores");
         $this->updateScores($gameweek);
 
-        $this->runtimeModel->add($lastTeamId);
+        $this->runtimeModel->add($gameweek, $lastTeamId);
         
         Log::log_message(sprintf('Time taken: %01.5f', (microtime(true) - $startTime)));
     }
