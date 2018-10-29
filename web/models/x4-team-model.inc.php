@@ -31,5 +31,32 @@ class X4TeamModel extends HaploModel {
             ', array(
         ));
     }
+    
+    public function getTeamPoints($seasonId, $gameweek) {
+        return $this->db->get_array('
+            select
+                teams.team_id, teams.team_name, sum(points.event_total) as event_total, sum(points.overall_total) as overall_total
+            from
+                teams
+            left join
+                players
+            on
+                teams.team_id = players.team_id
+            left join 
+                points
+            on 
+                players.player_id = points.player_id
+            where
+                season_id = :season_id and
+                gameweek = :gameweek
+            group by
+                teams.team_id, teams.team_name
+            order by
+                event_total DESC
+            ', array(
+                ':season_id' => 2018,
+                ':gameweek' => 10
+        ));
+    }
 
 }

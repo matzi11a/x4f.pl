@@ -35,6 +35,8 @@ class X4FplProcessor {
         $this->getModels();
         $startTime = microtime(true);
         
+        //$this->importTeam(880);
+        
         $lastRun = $this->runtimeModel->getLastRuntime();        
         $lastTeamId = isset($lastRun['last_team_id']) ? $lastRun['last_team_id'] : 29947;
         
@@ -79,6 +81,13 @@ class X4FplProcessor {
         return $start;
     }
     
+    private function importTeam($id) {
+        if (($data = $this->_fetch($id)) != null) {
+            Log::log_message(sprintf('fetched %s', $data->league->name));
+            $this->add_team($data);
+        }
+    }
+
     private function _fetch($id) {
         $httpRequest = HttpRequest::get_instance();
         $data = $httpRequest->get_http("https://fantasy.premierleague.com/drf/leagues-classic-standings/" . $id);
