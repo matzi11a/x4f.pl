@@ -34,6 +34,10 @@ class Home extends X4FPLBaseAction {
         $this->templateVars['redirectUrl'] = $this->redirectUrl;
         $this->templateVars['error'] = $this->error;
         $this->templateVars['template'] = 'home.php';
+        
+        
+        
+        $this->templateVars['leagues'] = $this->x4TeamModel->getTeams();
 
         parent::do_all();
     }
