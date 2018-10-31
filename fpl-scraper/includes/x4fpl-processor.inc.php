@@ -30,12 +30,16 @@ class X4FplProcessor {
     public function __clone() {
         throw new Exception('This class cannot be cloned');
     }
-
+    
+    //https://x4f.pl/
+        
     public function run() {
         $this->getModels();
         $startTime = microtime(true);
         
         //$this->importTeam(880);
+//        $this->importTeam(328);
+//        exit;
         
         $lastRun = $this->runtimeModel->getLastRuntime();        
         $lastTeamId = isset($lastRun['last_team_id']) ? $lastRun['last_team_id'] : 29947;
