@@ -9,3 +9,21 @@
     margin-left:auto;
     margin-right:auto;
 }
+
+.teamtable {
+    margin-left: 50px;
+    margin-right: 50px;
+}
+
+.teamtable table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+.teamtable table {
+    width: 100%;
+}
+
+.teamtable th, td {
+    padding: 15px;
+}

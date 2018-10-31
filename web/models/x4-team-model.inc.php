@@ -35,7 +35,7 @@ class X4TeamModel extends HaploModel {
     public function getTeamPoints($seasonId, $gameweek) {
         return $this->db->get_array('
             select
-                teams.team_id, teams.team_name, sum(points.event_total) as event_total, sum(points.overall_total) as overall_total
+                teams.team_id, REPLACE(teams.team_name, " | X4F.PL", "") as team_name, sum(points.event_total) as event_total, sum(points.overall_total) as overall_total
             from
                 teams
             left join

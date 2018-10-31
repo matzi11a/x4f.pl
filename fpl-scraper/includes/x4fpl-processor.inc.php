@@ -8,7 +8,6 @@ class X4FplProcessor {
 
     /** @var X4FplProcessor */
     static protected $instance = null;
-    
     protected $x4TeamModel;
     protected $x4PlayerModel;
     protected $x4PointsModel;
@@ -30,40 +29,40 @@ class X4FplProcessor {
     public function __clone() {
         throw new Exception('This class cannot be cloned');
     }
-    
+
     //https://x4f.pl/
-        
+
     public function run() {
         $this->getModels();
         $startTime = microtime(true);
-        
+
         //$this->importTeam(880);
-//        $this->importTeam(328);
-//        exit;
-        
-        $lastRun = $this->runtimeModel->getLastRuntime();        
+        //$this->importTeam(328);
+        //exit;
+
+        $lastRun = $this->runtimeModel->getLastRuntime();
         $lastTeamId = isset($lastRun['last_team_id']) ? $lastRun['last_team_id'] : 29947;
-        
+
         $gameweek = $this->queryStatic();
-        
+
         Log::log_message(sprintf("Scanning Leagues from %d", $lastTeamId));
         $lastTeamId = $this->scanFplLeagues($lastTeamId);
-        
+
         Log::log_message("Updating scores");
         $this->updateScores($gameweek);
 
         $this->runtimeModel->add($gameweek, $lastTeamId);
-        
+
         Log::log_message(sprintf('Time taken: %01.5f', (microtime(true) - $startTime)));
     }
-    
+
     private function queryStatic() {
         $httpRequest = HttpRequest::get_instance();
         $data = $httpRequest->get_http("https://fantasy.premierleague.com/drf/bootstrap-static");
         $data = json_decode($data);
         return $data->{'current-event'};
     }
-    
+
     private function updateScores($gameweek) {
         foreach ($this->x4TeamModel->getTeams() as $x4Team) {
             if (($data = $this->_fetch($x4Team['team_id'])) != null) {
@@ -73,18 +72,29 @@ class X4FplProcessor {
             }
         }
     }
-    
+
     private function scanFplLeagues($start) {
-        while (($data = $this->_fetch($start)) != null) {            
-            Log::log_message(sprintf('found %s', $data->league->name));
-            if (substr($data->league->name, 6) === 'X4F.PL') {
-                $this->add_team($data);
+        $fails = 0;
+        while ($fails < 10) {
+            try {
+                if (($data = $this->_fetch($start)) != null) {
+                    Log::log_message(sprintf('found %s', $data->league->name));
+                    if (substr($data->league->name, 6) === 'X4F.PL') {
+                        $this->add_team($data);
+                    }
+                    $fails = 0;
+                } else {
+                    throw new Exception('Failed fetch: ' . $start);
+                }
+            } catch (Exception $e) {
+                echo 'Caught exception: ', $e->getMessage(), "\n";
+                $fails++;
             }
             $start++;
         }
         return $start;
     }
-    
+
     private function importTeam($id) {
         if (($data = $this->_fetch($id)) != null) {
             Log::log_message(sprintf('fetched %s', $data->league->name));
@@ -93,13 +103,15 @@ class X4FplProcessor {
     }
 
     private function _fetch($id) {
+        sleep(2);                                       //lets be nice to the server
         $httpRequest = HttpRequest::get_instance();
         $data = $httpRequest->get_http("https://fantasy.premierleague.com/drf/leagues-classic-standings/" . $id);
-        $data = json_decode($data);
-        sleep(3);
+        if ($data !== false) {
+            $data = json_decode($data);
+        }
         return $data;
     }
-    
+
     private function add_team($data) {
         foreach ($data->standings->results as $fplteam) {
             $this->x4PlayerModel->save($fplteam->id, $data->league->id, $fplteam->entry_name, $fplteam->player_name);
@@ -113,4 +125,5 @@ class X4FplProcessor {
         $this->x4PointsModel = new X4PointsModel();
         $this->runtimeModel = new RuntimeModel();
     }
+
 }
