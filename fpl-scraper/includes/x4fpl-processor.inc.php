@@ -113,6 +113,7 @@ class X4FplProcessor {
     }
 
     private function add_team($data) {
+        Log::log_message(sprintf('adding team %s', $data->league->name));
         foreach ($data->standings->results as $fplteam) {
             $this->x4PlayerModel->save($fplteam->id, $data->league->id, $fplteam->entry_name, $fplteam->player_name);
         }
