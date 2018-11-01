@@ -75,11 +75,11 @@ class X4FplProcessor {
 
     private function scanFplLeagues($start) {
         $fails = 0;
-        while ($fails < 10) {
+        while ($fails < 101) {
             try {
                 if (($data = $this->_fetch($start)) != null) {
                     Log::log_message(sprintf('found %s', $data->league->name));
-                    if (substr($data->league->name, 6) === 'X4F.PL') {
+                    if (substr($data->league->name, -6) === 'X4F.PL') {
                         $this->add_team($data);
                     }
                     $fails = 0;
