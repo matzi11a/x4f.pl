@@ -55,7 +55,7 @@ class X4TeamModel extends HaploModel {
                 event_total DESC
             ', array(
                 ':season_id' => 2018,
-                ':gameweek' => 10
+                ':gameweek' => $gameweek
         ));
     }
 

@@ -36,7 +36,7 @@ class Home extends X4FPLBaseAction {
         $this->templateVars['template'] = 'home.php';
         
         
-        $gameweek = 10;
+        $gameweek = 11;
         //$this->templateVars['x4teams'] = $this->x4TeamModel->getTeams();
         $this->templateVars['x4teams'] = $this->x4TeamModel->getTeamPoints(2018, $gameweek);
         $this->templateVars['gameweek'] = $gameweek;

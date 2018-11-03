@@ -12,6 +12,8 @@ class X4FplProcessor {
     protected $x4PlayerModel;
     protected $x4PointsModel;
     protected $runtimeModel;
+    protected $livePointsModel;
+    protected $x4playerPicksModel;
 
     /**
      * @return X4FplProcessor
@@ -36,10 +38,10 @@ class X4FplProcessor {
         $this->getModels();
         $startTime = microtime(true);
 
-        //$this->importTeam(880);
-        //$this->importTeam(328);
-        //exit;
-
+//        $this->importTeam(1267602);
+//        $this->importTeam(328);
+//        $this->importTeam(1265830);
+//
         $lastRun = $this->runtimeModel->getLastRuntime();
         $lastTeamId = isset($lastRun['last_team_id']) ? $lastRun['last_team_id'] : 29947;
 
@@ -48,12 +50,56 @@ class X4FplProcessor {
         Log::log_message(sprintf("Scanning Leagues from %d", $lastTeamId));
         $lastTeamId = $this->scanFplLeagues($lastTeamId);
 
+        Log::log_message(sprintf("Updating live match scores"));
+        $this->updateLive($gameweek);
+
+        //only do this once at the beginning of the gameweek (how?)
+        if (!$this->x4playerPicksModel->has_run($gameweek)) {
+            Log::log_message(sprintf("Updating player picks"));
+            $this->updatePlayerPicks($gameweek);
+        }
+
         Log::log_message("Updating scores");
         $this->updateScores($gameweek);
 
         $this->runtimeModel->add($gameweek, $lastTeamId);
 
         Log::log_message(sprintf('Time taken: %01.5f', (microtime(true) - $startTime)));
+    }
+
+    private function updatePlayerPicks($gameweek) {
+        foreach ($this->x4PlayerModel->getPlayers() as $x4Player) {
+            if (($data = $this->_fetchPlayerPicks($x4Player['player_id'], $gameweek)) != null) {
+                foreach ($data->picks as $pick) {
+                    $this->x4playerPicksModel->save($gameweek, $x4Player['player_id'], $pick->position, $pick->element, $pick->multiplier);
+                }
+            }
+        }
+    }
+
+    private function updateLive($gameweek) {
+        $httpRequest = HttpRequest::get_instance();
+        $data = $httpRequest->get_http("https://fantasy.premierleague.com/drf/event/" . $gameweek . "/live");
+        $data = json_decode($data);
+        foreach ($data->elements as $premId => $element) {
+            //echo($premId . " " . "\n");
+            $points = 0;
+            foreach ($element->explain as $matchPlayerDetail) {
+                //echo(print_r($matchPlayerDetail, true) . " " . "\n");
+                foreach ($matchPlayerDetail as $matchPlayerDetailEntry) {
+                    //echo(print_r($matchPlayerDetailEntry, true) . " " . "\n");
+                    if (is_object($matchPlayerDetailEntry)) {
+                        //echo(print_r(get_object_vars($matchPlayerDetailEntry), true) . " " . "\n");
+                        foreach (get_object_vars($matchPlayerDetailEntry) as $stat) {
+                            //print $stat->name . " " . $stat->points . "\n";
+                            $points += $stat->points;
+                        }
+                        //echo($matchPlayerDetailEntry->minutes->points . " " . "\n");
+                    }
+                }
+            }
+            $this->livePointsModel->save($gameweek, $premId, $points);
+        }
     }
 
     private function queryStatic() {
@@ -64,6 +110,12 @@ class X4FplProcessor {
     }
 
     private function updateScores($gameweek) {
+        //which one? what time is it?
+        $this->updateScoresLive($gameweek);
+        //$this->updateScoresFinal($gameweek);
+    }
+
+    private function updateScoresFinal($gameweek) {
         foreach ($this->x4TeamModel->getTeams() as $x4Team) {
             if (($data = $this->_fetch($x4Team['team_id'])) != null) {
                 foreach ($data->standings->results as $fplteam) {
@@ -71,6 +123,10 @@ class X4FplProcessor {
                 }
             }
         }
+    }
+
+    private function updateScoresLive($gameweek) {
+        $this->x4PointsModel->updateFromLive(2018, $gameweek);
     }
 
     private function scanFplLeagues($start) {
@@ -112,10 +168,23 @@ class X4FplProcessor {
         return $data;
     }
 
+    private function _fetchPlayerPicks($playerId, $gameweek) {
+        sleep(2);                                       //lets be nice to the server
+        $httpRequest = HttpRequest::get_instance();
+        $data = $httpRequest->get_http(sprintf("https://fantasy.premierleague.com/drf/entry/%d/event/%d/picks", $playerId, $gameweek));
+        if ($data !== false) {
+            $data = json_decode($data);
+        }
+        return $data;
+    }
+
     private function add_team($data) {
         Log::log_message(sprintf('adding team %s', $data->league->name));
         foreach ($data->standings->results as $fplteam) {
-            $this->x4PlayerModel->save($fplteam->id, $data->league->id, $fplteam->entry_name, $fplteam->player_name);
+            $this->x4PlayerModel->save($fplteam->entry, $data->league->id, $fplteam->entry_name, $fplteam->player_name);
+        }
+        foreach ($data->new_entries->results as $fplteam) {
+            $this->x4PlayerModel->save($fplteam->entry, $data->league->id, $fplteam->entry_name, $fplteam->player_first_name . " " . $fplteam->player_last_name);
         }
         $this->x4TeamModel->save($data->league->id, $data->league->name);
     }
@@ -125,6 +194,8 @@ class X4FplProcessor {
         $this->x4PlayerModel = new X4PlayerModel();
         $this->x4PointsModel = new X4PointsModel();
         $this->runtimeModel = new RuntimeModel();
+        $this->livePointsModel = new LivePointsModel();
+        $this->x4playerPicksModel = new X4PlayerPicksModel();
     }
 
 }

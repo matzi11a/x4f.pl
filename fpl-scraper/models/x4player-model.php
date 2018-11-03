@@ -27,6 +27,15 @@ class X4PlayerModel extends Model {
 
     }
     
+    public function getPlayers() {
+        return $this->db->get_array('
+            select
+                id, player_id, player_team_name, player_name
+            from
+                players
+            ', array(
+        ));
+    }
     
     
 
