@@ -21,7 +21,7 @@ class X4PointsModel extends Model {
     }
 
     public function updateFromLive($seasonId, $gameweek) {
-        Log::log_message('update points from live' . $gameweek);
+        Log::log_message('update points from live ' . $gameweek);
         
         $this->db->run("
             replace into points (
