@@ -37,8 +37,10 @@ class Home extends X4FPLBaseAction {
         
         
         $gameweek = 11;
+        $lastGameweek = 11;
         //$this->templateVars['x4teams'] = $this->x4TeamModel->getTeams();
         $this->templateVars['x4teams'] = $this->x4TeamModel->getTeamPoints(2018, $gameweek);
+        $this->templateVars['leaderboard'] = $this->x4TeamModel->getLeaderboard(2018, $lastGameweek);
         $this->templateVars['gameweek'] = $gameweek;
 
         parent::do_all();

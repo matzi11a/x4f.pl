@@ -14,6 +14,7 @@ class X4FplProcessor {
     protected $runtimeModel;
     protected $livePointsModel;
     protected $x4playerPicksModel;
+    protected $hitsModel;
 
     /**
      * @return X4FplProcessor
@@ -73,6 +74,9 @@ class X4FplProcessor {
                 foreach ($data->picks as $pick) {
                     $this->x4playerPicksModel->save($gameweek, $x4Player['player_id'], $pick->position, $pick->element, $pick->multiplier);
                 }
+                if ($data->entry_history->event_transfers_cost > 0) {
+                    $this->hitsModel->save(2018, $gameweek, $x4Player['player_id'], $data->entry_history->event_transfers_cost);
+                }
             }
         }
     }
@@ -111,15 +115,15 @@ class X4FplProcessor {
 
     private function updateScores($gameweek) {
         //which one? what time is it?
-        $this->updateScoresLive($gameweek);
-        //$this->updateScoresFinal($gameweek);
+        //$this->updateScoresLive($gameweek);
+        $this->updateScoresFinal($gameweek);
     }
 
     private function updateScoresFinal($gameweek) {
         foreach ($this->x4TeamModel->getTeams() as $x4Team) {
             if (($data = $this->_fetch($x4Team['team_id'])) != null) {
                 foreach ($data->standings->results as $fplteam) {
-                    $this->x4PointsModel->save(2018, $gameweek, $fplteam->id, $fplteam->event_total, $fplteam->total);
+                    $this->x4PointsModel->save(2018, $gameweek, $fplteam->entry, $fplteam->event_total, $fplteam->total);
                 }
             }
         }
@@ -196,6 +200,7 @@ class X4FplProcessor {
         $this->runtimeModel = new RuntimeModel();
         $this->livePointsModel = new LivePointsModel();
         $this->x4playerPicksModel = new X4PlayerPicksModel();
+        $this->hitsModel = new HitsModel();
     }
 
 }

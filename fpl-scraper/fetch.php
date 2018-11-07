@@ -11,6 +11,7 @@ require('models/x4points-model.php');
 require('models/runtime-model.php');
 require('models/live-points-model.php');
 require('models/x4player-picks-model.php');
+require('models/hits-model.php');
 require('includes/x4fpl-processor.inc.php');
 require('config.inc.php');
 
