@@ -43,29 +43,38 @@ class X4FplProcessor {
 //        $this->importTeam(1267602);
 //        $this->importTeam(328);
 //        $this->importTeam(1265830);
-//
+
         $lastRun = $this->runtimeModel->getLastRuntime();
         $lastTeamId = isset($lastRun['last_team_id']) ? $lastRun['last_team_id'] : 29947;
-
+        
         $gameweek = $this->queryStatic();
 
-        Log::log_message(sprintf("Scanning Leagues from %d", $lastTeamId));
-        $lastTeamId = $this->scanFplLeagues($lastTeamId);
+        $gameweekCompleted = $this->winnersModel->hasWinner(2018, $gameweek);
+        Log::log_message(sprintf("Gameweek complted? %s", ($gameweekCompleted ? 'yes' : 'no')));
+                
+        if (!$gameweekCompleted) {
+            Log::log_message(sprintf("Updating live match scores"));
+            $state = $this->updateLive($gameweek);
+        }
+        
+        if ($gameweekCompleted || !$state['in_progress']) {
+            Log::log_message(sprintf("Scanning Leagues from %d", $lastTeamId));
+            $lastTeamId = $this->scanFplLeagues($lastTeamId);
+        }
 
-        Log::log_message(sprintf("Updating live match scores"));
-        $endOfGames = $this->updateLive($gameweek);
-
-        //only do this once at the beginning of the gameweek (how?)
+        //only do this once at the beginning of the gameweek
         if (!$this->x4playerPicksModel->has_run($gameweek)) {
             Log::log_message(sprintf("Updating player picks"));
             $this->updatePlayerPicks($gameweek);
         }
 
-        Log::log_message("Updating scores");
-        $this->updateScores($gameweek, $endOfGames);
-        
-        if ($endOfGames) {
-            $this->winnersModel->save(2018, $gameweek);
+        if (!$gameweekCompleted) {
+            Log::log_message("Updating scores");
+            $finishedGameweek = $this->updateScores($gameweek, $state['all_done']);
+
+            if ($finishedGameweek) {
+                $this->winnersModel->save(2018, $gameweek);
+            }
         }
 
         $this->runtimeModel->add($gameweek, $lastTeamId);
@@ -110,10 +119,15 @@ class X4FplProcessor {
             $this->livePointsModel->save($gameweek, $premId, $points);
         }
         $alldone = true;
+        $inprogress = false;
         foreach ($data->fixtures as $event) {
             $alldone = $alldone && $event->finished;
+            $inprogress = $inprogress || ($event->started && !$event->finished_provisional);
         }
-        return $alldone;
+        return array(
+            'all_done' => $alldone,
+            'in_progress' => $inprogress
+        );
     }
 
     private function queryStatic() {
@@ -125,21 +139,29 @@ class X4FplProcessor {
 
     private function updateScores($gameweek, $endOfgames) {
         //which one? what time is it?
+        $finished = false;
         if ($endOfgames) {
-            $this->updateScoresFinal($gameweek);
+            $finished = $this->updateScoresFinal($gameweek);
         } else {
             $this->updateScoresLive($gameweek);
         }
+        return $finished;
     }
 
     private function updateScoresFinal($gameweek) {
-        foreach ($this->x4TeamModel->getTeams() as $x4Team) {
+        $count = 0;
+        $x4Teams = $this->x4TeamModel->getTeams();
+        foreach ($x4Teams as $x4Team) {
             if (($data = $this->_fetch($x4Team['team_id'])) != null) {
                 foreach ($data->standings->results as $fplteam) {
                     $this->x4PointsModel->save(2018, $gameweek, $fplteam->entry, $fplteam->event_total, $fplteam->total);
+                    if ($fplteam->total > 0) {
+                        $count++;
+                    }
                 }
             }
         }
+        return ($count == (count($x4Teams) * 4));
     }
 
     private function updateScoresLive($gameweek) {

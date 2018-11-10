@@ -10,7 +10,7 @@ class LivePointsModel extends Model {
      * String playerName
      */
     public function save($gameweek, $premId, $points) {
-        Log::log_message('saving live points for ' . $gameweek . " " . $premId . " " . $points);
+        //Log::log_message('saving live points for ' . $gameweek . " " . $premId . " " . $points);
 
         $this->db->run("
                 replace into live (

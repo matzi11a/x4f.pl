@@ -33,4 +33,39 @@ class WinnersModel extends Model {
                 ':gameweek' => $gameweek
         ));    
     }
+    
+    public function get($seasonId, $gameweek) {
+        Log::log_message('get winners for gameweek ' . $gameweek);
+        
+        return $this->db->get_array('
+            select
+                team_id
+            from
+                winners
+            where
+                season_id = :season_id and
+                gameweek = :gameweek
+            ', array(
+                ':season_id' => $seasonId,
+                ':gameweek' => $gameweek
+        ));
+        
+    }
+    
+    public function hasWinner($seasonId, $gameweek) {
+        return $this->db->get_column('
+            select
+                team_id
+            from
+                winners
+            where
+                season_id = :season_id and
+                gameweek = :gameweek
+            ', array(
+                ':season_id' => $seasonId,
+                ':gameweek' => $gameweek
+        )) > 0;
+    }
+    
+    
 }
