@@ -19,7 +19,20 @@
                         <?php foreach ($x4teams as $team): ?>
                             <tr>
                                 <td><?= ++$ii; ?></td>
-                                <td><?= $team['team_name']; ?></td>
+                                <td>
+                                    <span class="spnDetails"><?= $team['team_name']; ?></span>
+                                    <span class="spnTooltip">
+                                        <table>
+                                        <?php foreach ($x4players[$team['team_id']] as $player): ?>
+                                            <tr>
+                                            <td><?= $player['player_team_name']; ?></td>
+                                            <td><?= $player['event_total']; ?></td>
+                                            <td><?= $player['hits']; ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                        </table>
+                                    </span>
+                                </td>
                                 <td><?= $team['event_total']; ?></td>
                                 <td><?= $team['hits']; ?></td>
                             </tr>
