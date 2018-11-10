@@ -15,6 +15,7 @@ class X4FplProcessor {
     protected $livePointsModel;
     protected $x4playerPicksModel;
     protected $hitsModel;
+    protected $winnersModel;
 
     /**
      * @return X4FplProcessor
@@ -52,7 +53,7 @@ class X4FplProcessor {
         $lastTeamId = $this->scanFplLeagues($lastTeamId);
 
         Log::log_message(sprintf("Updating live match scores"));
-        $this->updateLive($gameweek);
+        $endOfGames = $this->updateLive($gameweek);
 
         //only do this once at the beginning of the gameweek (how?)
         if (!$this->x4playerPicksModel->has_run($gameweek)) {
@@ -61,7 +62,11 @@ class X4FplProcessor {
         }
 
         Log::log_message("Updating scores");
-        $this->updateScores($gameweek);
+        $this->updateScores($gameweek, $endOfGames);
+        
+        if ($endOfGames) {
+            $this->winnersModel->save(2018, $gameweek);
+        }
 
         $this->runtimeModel->add($gameweek, $lastTeamId);
 
@@ -104,6 +109,11 @@ class X4FplProcessor {
             }
             $this->livePointsModel->save($gameweek, $premId, $points);
         }
+        $alldone = true;
+        foreach ($data->fixtures as $event) {
+            $alldone = $alldone && $event->finished;
+        }
+        return $alldone;
     }
 
     private function queryStatic() {
@@ -113,10 +123,13 @@ class X4FplProcessor {
         return $data->{'current-event'};
     }
 
-    private function updateScores($gameweek) {
+    private function updateScores($gameweek, $endOfgames) {
         //which one? what time is it?
-        //$this->updateScoresLive($gameweek);
-        $this->updateScoresFinal($gameweek);
+        if ($endOfgames) {
+            $this->updateScoresFinal($gameweek);
+        } else {
+            $this->updateScoresLive($gameweek);
+        }
     }
 
     private function updateScoresFinal($gameweek) {
@@ -201,6 +214,7 @@ class X4FplProcessor {
         $this->livePointsModel = new LivePointsModel();
         $this->x4playerPicksModel = new X4PlayerPicksModel();
         $this->hitsModel = new HitsModel();
+        $this->winnersModel = new WinnersModel();
     }
 
 }
