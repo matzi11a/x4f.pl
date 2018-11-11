@@ -37,7 +37,7 @@ class X4PointsModel extends Model {
             left join 
                 live 
             on 
-                player_picks.prem_id = live.prem_id
+                player_picks.prem_id = live.prem_id and player_picks.gameweek = live.gameweek
             where 
                 live.gameweek = :gameweek
             and
