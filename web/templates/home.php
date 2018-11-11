@@ -58,7 +58,19 @@
                         <?php foreach ($leaderboard as $team): ?>
                             <tr>
                                 <td><?= ++$ii; ?></td>
-                                <td><?= $team['team_name']; ?></td>
+                                <td>
+                                    <span class="spnDetails"><?= $team['team_name']; ?></span>
+                                    <span class="spnTooltip">
+                                        <table>
+                                        <?php foreach ($x4players[$team['team_id']] as $player): ?>
+                                            <tr>
+                                            <td><?= $player['player_team_name']; ?></td>
+                                            <td><?= $player['overall_total']; ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                        </table>
+                                    </span>
+                                </td>
                                 <td><?= $team['wins']; ?></td>
                                 <td><?= $team['overall_total']; ?></td>
                             </tr>
