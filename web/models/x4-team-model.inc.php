@@ -67,8 +67,9 @@ class X4TeamModel extends HaploModel {
 
     public function getLeaderboard($seasonId, $gameweek) {
         return $this->db->get_array('
-                select      
-                    teams.team_id, REPLACE(teams.team_name, " | X4F.PL", "") as team_name, count(distinct(winners.gameweek)) as wins, sum(points.overall_total) as overall_total 
+                select    
+                    teams.team_id, REPLACE(teams.team_name, " | X4F.PL", "") as team_name, 
+                    COALESCE(w.wins, 0) as wins, sum(points.overall_total) as overall_total 
                 from                  
                     teams             
                 left join                 
@@ -78,17 +79,26 @@ class X4TeamModel extends HaploModel {
                 left join                  
                     points             
                 on                  
-                    players.player_id = points.player_id and points.gameweek = 11 
-                left join      
-                    winners 
+                    players.player_id = points.player_id
+                left join     
+                    (
+                    select 
+                        team_id, count(distinct(gameweek)) as wins
+                    from
+                        winners
+                    group by 
+                        team_id
+                    ) w 
                 on 
-                    teams.team_id = winners.team_id  
+                    w.team_id = teams.team_id
+                where 
+                    points.season_id = :season_id and points.gameweek = :gameweek
                 group by      
-                    teams.team_id, teams.team_name
+                    teams.team_id, teams.team_name, w.wins
                 order by 
                     wins DESC, overall_total DESC
             ', array(
-                ':season_id' => 2018,
+                ':season_id' => $seasonId,
                 ':gameweek' => $gameweek
         ));
     }

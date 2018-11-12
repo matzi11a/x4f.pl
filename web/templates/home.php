@@ -64,8 +64,8 @@
                                         <table>
                                         <?php foreach ($x4players[$team['team_id']] as $player): ?>
                                             <tr>
-                                            <td><?= $player['player_team_name']; ?></td>
-                                            <td><?= $player['overall_total']; ?></td>
+                                                <td><?= $player['player_team_name']; ?></td>
+                                                <td><?= $player['overall_total']; ?></td>
                                             </tr>
                                         <?php endforeach; ?>
                                         </table>
@@ -86,7 +86,7 @@
             <h3>How to join</h3>
             <span class="align-middle">
                 <ol>
-                    <li>create a league on fpl named for example "My Team Name | X4F.PL"</li>
+                    <li>create a league on fpl with a name ending in "| X4F.PL", for example "My Team Name | X4F.PL"</li>
                     <li>invite 3 buddies to join this "x4 league"</li>
                     <li>this x4 league will be automatically picked up by the x4 scanner at next gameweek</li>
                     <li>scoring, the x4 team has a weekly score (fpl gameweeks) which is the sum of the 4 players scores in the x4 league</li>
