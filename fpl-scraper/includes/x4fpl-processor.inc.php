@@ -69,6 +69,10 @@ class X4FplProcessor {
         }
 
         if (!$gameweekCompleted) {
+            if ($state['all_done']) {
+                Log::log_message("Sleeping 8 hours for updates on fpl to complete");
+                sleep(3600 * 8);
+            }
             Log::log_message("Updating scores");
             $finishedGameweek = $this->updateScores($gameweek, $state['all_done']);
 
