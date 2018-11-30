@@ -17,10 +17,12 @@ abstract class X4FPLBaseAction extends HaploAction {
     
     protected $x4TeamModel;
     protected $x4PlayerModel;
+    protected $x4RuntimeModel;
 
     protected function do_init() {
         $this->x4TeamModel = new X4TeamModel();
         $this->x4PlayerModel = new X4PlayerModel();
+        $this->x4RuntimeModel = new X4RuntimeModel();
     }
 
     protected function do_post() {

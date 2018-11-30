@@ -36,8 +36,7 @@ class Home extends X4FPLBaseAction {
         $this->templateVars['template'] = 'home.php';
         
         
-        $gameweek = 13;
-        $lastGameweek = 12;
+        $gameweek = $this->x4RuntimeModel->getGameweek();
         
         $players = array();
         foreach ($this->x4PlayerModel->getPlayerPoints(2018, $gameweek) as $player) {
@@ -46,7 +45,7 @@ class Home extends X4FPLBaseAction {
         
         $this->templateVars['x4players'] = $players;
         $this->templateVars['x4teams'] = $this->x4TeamModel->getTeamPoints(2018, $gameweek);
-        $this->templateVars['leaderboard'] = $this->x4TeamModel->getLeaderboard(2018, $lastGameweek);
+        $this->templateVars['leaderboard'] = $this->x4TeamModel->getLeaderboard(2018, ($gameweek - 1));
         $this->templateVars['gameweek'] = $gameweek;
 
         parent::do_all();
