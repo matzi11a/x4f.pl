@@ -66,18 +66,18 @@ class X4FplProcessor {
         if (!$this->x4playerPicksModel->has_run($gameweek)) {
             Log::log_message(sprintf("Updating player picks"));
             $this->updatePlayerPicks($gameweek);
-        }
+        } else {
+            if (!$gameweekCompleted) {
+                if ($state['all_done']) {
+                    Log::log_message("Sleeping 8 hours for updates on fpl to complete");
+                    sleep(3600 * 8);
+                }
+                Log::log_message("Updating scores");
+                $finishedGameweek = $this->updateScores($gameweek, $state['all_done']);
 
-        if (!$gameweekCompleted) {
-            if ($state['all_done']) {
-                Log::log_message("Sleeping 8 hours for updates on fpl to complete");
-                sleep(3600 * 8);
-            }
-            Log::log_message("Updating scores");
-            $finishedGameweek = $this->updateScores($gameweek, $state['all_done']);
-
-            if ($finishedGameweek) {
-                $this->winnersModel->save(2018, $gameweek);
+                if ($finishedGameweek) {
+                    $this->winnersModel->save(2018, $gameweek);
+                }
             }
         }
 
