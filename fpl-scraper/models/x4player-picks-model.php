@@ -34,7 +34,10 @@ class X4PlayerPicksModel extends Model {
             ", array(
             ':gameweek' => $gameweek
         ));
-        return $count > 0;
+        $players = $this->db->get_column("
+                select count(*) as count from players
+        ");
+        return $count = ($players * 15);
     }
 
 }

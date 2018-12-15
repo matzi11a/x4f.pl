@@ -64,8 +64,8 @@ class X4FplProcessor {
 
         //only do this once at the beginning of the gameweek
         if (!$this->x4playerPicksModel->has_run($gameweek)) {
-            Log::log_message("Sleeping 1 hour before pulling picks");
-            sleep(3600);
+            Log::log_message("Sleeping 15 mins before pulling picks");
+            sleep(900);
             Log::log_message(sprintf("Updating player picks"));
             $this->updatePlayerPicks($gameweek);
         } else {
