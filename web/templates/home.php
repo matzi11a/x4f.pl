@@ -90,7 +90,7 @@
                     <li>invite 3 buddies to join this "x4 league"</li>
                     <li>this x4 league will be automatically picked up by the x4 scanner at next gameweek</li>
                     <li>scoring, the x4 team has a weekly score (fpl gameweeks) which is the sum of the 4 players scores in the x4 league</li>
-                    <li>leaderboard will be ordered number of gameweek wins, then total score (sum of overall score of all four players)</li>
+                    <li>leaderboard will be ordered number of gameweek wins, then total score (sum of overall score of all four players from GW 1 - Start scoring on the x4 league from GW1)</li>
                     <li>later it will be possible to create & join x4 mini leagues ideally accessible via domains like fantasyfootballscout.x4f.pl</li>
                 </ol>
             </span>
