@@ -37,7 +37,7 @@ class X4PlayerPicksModel extends Model {
         $players = $this->db->get_column("
                 select count(*) as count from players
         ");
-        return $count = ($players * 15);
+        return ($count >= ($players * 15));
     }
 
 }
