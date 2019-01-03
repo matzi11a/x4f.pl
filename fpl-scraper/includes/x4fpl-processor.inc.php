@@ -43,6 +43,7 @@ class X4FplProcessor {
 //        $this->importTeam(1267602);
 //        $this->importTeam(328);
 //        $this->importTeam(1265830);
+//        $this->importTeam(1322524);
 
         $lastRun = $this->runtimeModel->getLastRuntime();
         $lastTeamId = isset($lastRun['last_team_id']) ? $lastRun['last_team_id'] : 29947;
@@ -55,6 +56,7 @@ class X4FplProcessor {
         if (!$gameweekCompleted) {
             Log::log_message(sprintf("Updating live match scores"));
             $state = $this->updateLive($gameweek);
+            Log::log_message(sprintf("Gameweek progress %s", print_r($state, true)));
         }
         
         if ($gameweekCompleted || !$state['in_progress']) {
@@ -69,6 +71,7 @@ class X4FplProcessor {
             Log::log_message(sprintf("Updating player picks"));
             $this->updatePlayerPicks($gameweek);
         } else {
+            Log::log_message(sprintf("Updating player picks"));
             if (!$gameweekCompleted) {
                 if ($state['all_done']) {
                     Log::log_message("Sleeping 8 hours for updates on fpl to complete");
@@ -167,7 +170,7 @@ class X4FplProcessor {
                 }
             }
         }
-        return ($count == (count($x4Teams) * 4));
+        return ($count >= (count($x4Teams) * 4) - 2);
     }
 
     private function updateScoresLive($gameweek) {
@@ -193,7 +196,7 @@ class X4FplProcessor {
             }
             $start++;
         }
-        return $start;
+        return $start - $fails;
     }
 
     private function importTeam($id) {
