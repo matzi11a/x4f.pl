@@ -25,7 +25,8 @@
                                         <table>
                                         <?php foreach ($x4players[$team['team_id']] as $player): ?>
                                             <tr>
-                                            <td><?= $player['player_team_name']; ?></td>
+                                            <td><a href="https://fantasy.premierleague.com/a/entry/<?= $player['player_id']; ?>/history" target="_blank"><?= $player['player_team_name']; ?></a></td>
+                                            <!-- td><?= $player['player_team_name']; ?></td -->
                                             <td><?= $player['event_total']; ?></td>
                                             <td><?= $player['hits']; ?></td>
                                             </tr>

@@ -30,7 +30,7 @@ class X4PlayerModel extends HaploModel {
     public function getPlayerPoints($seasonId, $gameweek) {
         return $this->db->get_array('
             select 
-                players.team_id, players.player_team_name, players.player_name, points.event_total, COALESCE((hits.hits_total * -1), 0) as hits, points2.overall_total  
+                players.team_id, players.player_id, players.player_team_name, players.player_name, points.event_total, COALESCE((hits.hits_total * -1), 0) as hits, points2.overall_total  
             from 
                 players 
             left join 
